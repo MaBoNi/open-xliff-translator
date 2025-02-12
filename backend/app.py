@@ -1,5 +1,6 @@
 import os
-import defusedxml.ElementTree as ET
+import defusedxml.ElementTree as DET  # ✅ Use defusedxml for secure parsing
+import xml.etree.ElementTree as ET  # ✅ Use standard ElementTree for writing XML
 from flask import Flask, request, send_from_directory, jsonify
 import requests
 
@@ -21,37 +22,40 @@ def translate_text(text, target_lang="da"):
 
 def translate_xliff(input_file, output_file, target_lang="da"):
     """Parses an XLIFF file, translates text, and saves the translated file."""
-    tree = ET.parse(input_file)
+    tree = DET.parse(input_file)  # ✅ Securely parse XML using defusedxml
     root = tree.getroot()
-    
+
     for trans_unit in root.findall(".//trans-unit"):
         source = trans_unit.find("source")
         target = trans_unit.find("target")
-        
+
         if source is not None and (target is None or not target.text):
             translated_text = translate_text(source.text, target_lang)
             if target is None:
-                target = ET.SubElement(trans_unit, "target")
+                target = ET.SubElement(trans_unit, "target")  # ✅ Use standard ElementTree for writing
             target.text = translated_text
+
+    # ✅ Convert to standard ElementTree for writing the XML safely
+    new_tree = ET.ElementTree(root)
+    new_tree.write(output_file, encoding="utf-8", xml_declaration=True)
     
-    tree.write(output_file, encoding="utf-8", xml_declaration=True)
     return output_file
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "file" not in request.files:
         return jsonify({"error": "No file part"}), 400
-    
+
     file = request.files["file"]
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
-    
+
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(file_path)
-    
+
     output_file = os.path.join(PROCESSED_FOLDER, f"translated_{file.filename}")
     translated_file = translate_xliff(file_path, output_file)
-    
+
     return jsonify({"message": "File processed successfully", "download_url": f"/download/{os.path.basename(translated_file)}"})
 
 @app.route("/download/<filename>", methods=["GET"])
@@ -59,5 +63,5 @@ def download_file(filename):
     return send_from_directory(PROCESSED_FOLDER, filename, as_attachment=True)
 
 if __name__ == "__main__":
-    debug_mode = os.getenv("FLASK_DEBUG","False").lower() in ["true", "1"]
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ["true", "1"]
     app.run(host="0.0.0.0", port=5002, debug=debug_mode)
