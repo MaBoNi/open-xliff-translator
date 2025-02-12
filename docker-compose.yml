@@ -1,29 +1,27 @@
 services:
-  backend:
-    build: ./backend
+  open-xliff-translator:
+    build: .
+    container_name: open-xliff-translator
+    restart: unless-stopped
     ports:
-      - "5002:5000"
+      - "5003:5003"  # ✅ Corrected port mapping
     volumes:
-      - ./uploads:/app/uploads
-      - ./processed:/app/processed
+      - openxliff_uploads:/app/uploads
+      - openxliff_processed:/app/processed
     environment:
       - FLASK_DEBUG=True
     depends_on:
       - libretranslate
-    restart: unless-stopped
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:80"
-    depends_on:
-      - backend
-    restart: unless-stopped
 
   libretranslate:
     image: libretranslate/libretranslate
+    container_name: open-xliff-libretranslate
+    restart: unless-stopped
     ports:
-      - "5001:5000"
+      - "5002:5000"
     environment:
       - LT_LOAD_ONLY=en,da
-    restart: unless-stopped
+
+volumes:
+  openxliff_uploads:
+  openxliff_processed:
