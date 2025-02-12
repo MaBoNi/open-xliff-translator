@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./processed:/app/processed
+    depends_on:
+      - libretranslate
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  libretranslate:
+    image: libretranslate/libretranslate
+    ports:
+      - "5001:5000"
+    environment:
+      - LT_LOAD_ONLY=en,da
+    restart: always
