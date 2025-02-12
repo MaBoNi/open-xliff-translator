@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open XLIFF Translator</title>
+    <link rel="icon" href="https://bondit.services/wp-content/uploads/2024/04/favcion-bondit.webp" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        input, button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        textarea, pre {
+            width: 100%;
+            max-width: 100%;
+            min-height: 200px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #downloadLink {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+        }
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Open XLIFF Translator</h2>
+    
+    <form>
+        <label for="fileInput">Upload an XLIFF File:</label>
+        <input type="file" id="fileInput" accept=".xlf">
+        <br><br>
+        <button type="button" onclick="uploadFile()">Upload & Translate</button>
+    </form>
+
+    <p id="status"></p>
+
+    <h3>Preview of Uploaded File:</h3>
+    <pre id="fileContent">No file uploaded yet.</pre>
+
+    <a id="downloadLink" download>Download Translated File</a>
+
+    <footer>
+        <p><a href="https://github.com/MaBoNi/open-xliff-translator" target="_blank">GitHub Repository</a></p>
+        <p>&copy; 2024 BondIT ApS. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function previewFile() {
+            const fileInput = document.getElementById("fileInput");
+            const fileContent = document.getElementById("fileContent");
+
+            if (!fileInput.files.length) {
+                fileContent.textContent = "No file uploaded yet.";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const xmlString = e.target.result;
+                try {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+                    let previewText = "";
+                    const sources = xmlDoc.getElementsByTagName("source");
+                    for (let i = 0; i < sources.length && i < 20; i++) {
+                        previewText += `🔹 ${sources[i].textContent}\n`;
+                    }
+
+                    fileContent.textContent = previewText || "No translatable content found.";
+                } catch (error) {
+                    fileContent.textContent = "Error parsing XLIFF file.";
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const status = document.getElementById("status");
+            const downloadLink = document.getElementById("downloadLink");
+
+            if (!fileInput.files.length) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            status.textContent = "Uploading and processing...";
+            downloadLink.style.display = "none";
+
+            fetch("/upload", {  
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.download_url) {
+                    downloadLink.href = data.download_url;
+                    downloadLink.textContent = "Download Translated File";
+                    downloadLink.style.display = "block";
+                    status.textContent = "Translation complete!";
+                } else {
+                    status.textContent = "Error: " + (data.error || "Unknown error");
+                }
+            })
+            .catch(error => {
+                status.textContent = "Failed to connect to the server.";
+                console.error("Error:", error);
+            });
+        }
+
+        document.getElementById("fileInput").addEventListener("change", previewFile);
+    </script>
+</body>
+</html>
