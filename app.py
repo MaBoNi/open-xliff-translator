@@ -69,12 +69,14 @@ def upload_file():
 
 @app.route("/download/<filename>", methods=["GET"])
 def download_file(filename):
-    file_path = os.path.join(PROCESSED_FOLDER, filename)
-    
+    safe_filename = secure_filename(filename)
+    file_path = os.path.join(PROCESSED_FOLDER, safe_filename)
+
+    # ✅ Ensure the file exists before attempting to send it
     if not os.path.exists(file_path):
         return jsonify({"error": "File not found"}), 404
 
-    return send_from_directory(PROCESSED_FOLDER, filename, as_attachment=True)
+    return send_from_directory(PROCESSED_FOLDER, safe_filename, as_attachment=True)
 
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ["true", "1"]
