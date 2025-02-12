@@ -2,6 +2,7 @@ import os
 import defusedxml.ElementTree as DET  # ✅ Use defusedxml for secure parsing
 import xml.etree.ElementTree as ET  # ✅ Use standard ElementTree for writing XML
 from flask import Flask, request, send_from_directory, jsonify
+from werkzeug.utils import secure_filename
 import requests
 
 app = Flask(__name__)
@@ -50,7 +51,8 @@ def upload_file():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
 
     output_file = os.path.join(PROCESSED_FOLDER, f"translated_{file.filename}")
