@@ -1,10 +1,8 @@
-FROM node:18
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy the static HTML, CSS, and JS files to the Nginx public directory
+COPY . /usr/share/nginx/html
 
-COPY package.json package-lock.json ./
-RUN npm install
+EXPOSE 80
 
-COPY . .
-
-CMD ["npm", "run", "dev"]
+CMD ["nginx", "-g", "daemon off;"]
