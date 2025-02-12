@@ -41,7 +41,7 @@ jobs:
           echo "tag=${VERSION_TAG}" >> $GITHUB_ENV
 
       - name: Build and Push Backend Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
@@ -53,7 +53,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
 
       - name: Build and Push Frontend Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: true
