@@ -1,5 +1,5 @@
 import os
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from flask import Flask, request, send_from_directory, jsonify
 import requests
 
