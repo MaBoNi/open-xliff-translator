@@ -58,7 +58,7 @@ jobs:
           echo "tag=${VERSION_TAG}" >> $GITHUB_ENV
 
       - name: Build and Push Open XLIFF Translator Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
