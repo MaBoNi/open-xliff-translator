@@ -15,11 +15,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 def fix_placeholder_formatting(text):
-    """Ensures placeholders like %1$s and %n remain correctly formatted without extra spaces."""
+    """Ensures placeholders like %1$s and %n remain correctly formatted with a leading space if needed."""
     if text:
-        text = re.sub(r"%\s*(\d+)\s*\$", r"%\1$", text)  # Fix % 1 $s → %1$s
-        text = re.sub(r"%\s*n", r"%n", text)  # Fix % n → %n
+        text = re.sub(r"(?<!\s)%\s*(\d+)\s*\$", r" %\1$", text)  # Ensure space before %1$s
+        text = re.sub(r"(?<!\s)%\s*n", r" %n", text)  # Ensure space before %n
     return text
+
 
 def translate_text(text, target_lang="da"):
     """Translates text using LibreTranslate."""
