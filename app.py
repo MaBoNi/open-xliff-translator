@@ -1,4 +1,5 @@
 import os
+import re
 import defusedxml.ElementTree as DET
 import xml.etree.ElementTree as ET
 from flask import Flask, request, send_from_directory, jsonify, render_template
@@ -12,6 +13,14 @@ LIBRETRANSLATE_URL = "http://libretranslate:5000/translate"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+
+def fix_placeholder_formatting(text):
+    """Ensures placeholders like %1$s and %n remain correctly formatted with a leading space if needed."""
+    if text:
+        text = re.sub(r"(?<!\s)%\s*(\d+)\s*\$", r" %\1$", text)  # Ensure space before %1$s
+        text = re.sub(r"(?<!\s)%\s*n", r" %n", text)  # Ensure space before %n
+    return text
+
 
 def translate_text(text, target_lang="da"):
     """Translates text using LibreTranslate."""
@@ -32,6 +41,7 @@ def translate_xliff(input_file, output_file, target_lang="da"):
 
         if source is not None:
             translated_text = translate_text(source.text, target_lang)
+            translated_text = fix_placeholder_formatting(translated_text)
 
             if target is None:
                 target = ET.SubElement(trans_unit, "target")  # Ensure Transifex compatibility
@@ -72,7 +82,7 @@ def download_file(filename):
     safe_filename = secure_filename(filename)
     file_path = os.path.join(PROCESSED_FOLDER, safe_filename)
 
-    # ✅ Ensure the file exists before attempting to send it
+    # Ensure the file exists before attempting to send it
     if not os.path.exists(file_path):
         return jsonify({"error": "File not found"}), 404
 
@@ -81,4 +91,3 @@ def download_file(filename):
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ["true", "1"]
     app.run(host="0.0.0.0", port=5003, debug=debug_mode)
-
