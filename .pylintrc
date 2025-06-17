@@ -6,18 +6,12 @@ load-plugins=
 
 [MESSAGES CONTROL]
 disable=
-    C0413,  # import-outside-toplevel
     C0114,  # missing-module-docstring
     C0115,  # missing-class-docstring
     C0116,  # missing-function-docstring
     R0903,  # too-few-public-methods
     R0913,  # too-many-arguments
-    R0914,  # too-many-locals
-    R0915,  # too-many-statements
-    R0912,  # too-many-branches
-    R0917,  # too-many-positional-arguments
     W0718,  # catching-too-general-exception
-    W1203,  # logging-fstring-interpolation
 
 [FORMAT]
 max-line-length=120
