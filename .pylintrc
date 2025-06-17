@@ -1,0 +1,27 @@
+[MASTER]
+ignore=venv
+jobs=1
+load-plugins=
+    pylint.extensions.docparams
+
+[MESSAGES CONTROL]
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    R0903,  # too-few-public-methods
+    R0913,  # too-many-arguments
+    W0718,  # catching-too-general-exception
+
+[FORMAT]
+max-line-length=120
+
+[DESIGN]
+max-args=6
+max-locals=20
+
+[TYPECHECK]
+ignored-modules=requests
+
+[LOGGING]
+logging-modules=logging

@@ -1,6 +1,6 @@
 # Open XLIFF Translator
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/MaBoNi/open-xliff-translator/build-and-push.yml?branch=main&style=for-the-badge)
+![Build Status](https://img.shields.io/github/actions/workflow/status/MaBoNi/open-xliff-translator/docker-publish.yml?branch=main&style=for-the-badge)
 ![License](https://img.shields.io/github/license/MaBoNi/open-xliff-translator?style=for-the-badge)
 ![Repo Size](https://img.shields.io/github/repo-size/MaBoNi/open-xliff-translator?style=for-the-badge)
 
