@@ -31,22 +31,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Restore Docker Build Cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: buildx-${{ github.sha }}
-          restore-keys: |
-            buildx-
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Set version-date tag
         id: tag
         run: |
@@ -58,14 +42,27 @@ jobs:
           VERSION_TAG="${VERSION}-${DATE_TAG}"
           echo "tag=${VERSION_TAG}" >> $GITHUB_ENV
 
-      - name: Build and Push Image
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build Docker image
         uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: |
+            maboni82/open-xliff-translator:latest
+            maboni82/open-xliff-translator:${{ env.tag }}
+          builder: ${{ steps.buildx.outputs.name }}
+      
+      - name: Push Docker images to Docker Hub
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
             maboni82/open-xliff-translator:latest
             maboni82/open-xliff-translator:${{ env.tag }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
           builder: ${{ steps.buildx.outputs.name }}
